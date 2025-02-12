@@ -11,6 +11,7 @@ export default function ChecklistForm() {
   const [file, setFile] = useState([]);
   const [textareaValues, setTextareaValues] = useState({});
   const [status, setStatus] = useState(""); 
+  const [imageUrls, setImageUrls] = useState([]);
 
   const [vehiculos, setVehiculos] = useState([]);
   const [selectedConductorId, setSelectedConductorId] = useState("");
@@ -157,7 +158,7 @@ const handleFileChange = async (event) => {
   };
 
   try {
-    let imageUrls = [];
+    
 
     // Procesar y subir cada imagen
     const uploadPromises = files.map(async (file) => {
@@ -181,8 +182,9 @@ const handleFileChange = async (event) => {
       return uploadData.secure_url;
     });
 
-    imageUrls = await Promise.all(uploadPromises);
-    console.log("✅ Imágenes subidas con éxito:", imageUrls);
+    const uploadedUrls = await Promise.all(uploadPromises);
+    setImageUrls((prevUrls) => [...prevUrls, ...uploadedUrls]); // Almacena en el estado
+    console.log("✅ Imágenes subidas con éxito:", uploadedUrls);
   } catch (error) {
     console.error("🚨 Error en la subida:", error);
   }
@@ -208,29 +210,6 @@ const handleFileChange = async (event) => {
       }
     });
 
-
-
-    /* try {
-      let imageUrls = [];
-      if (file.length > 0) {
-        // Subir la imagen al backend
-        const uploadResponse = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
-          throw new Error(errorData.error || "Error desconocido en la subida de imagen");
-        }
-
-        const uploadData = await uploadResponse.json();
-        imageUrls = uploadData.urls;
-
-        if (!imageUrls || imageUrls.length === 0) {
-          throw new Error("No se obtuvo URL de la imagen");
-        }
-      } */
 
       // Recopilar los datos del formulario
       const data = {
