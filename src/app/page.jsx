@@ -51,14 +51,10 @@ export default function ChecklistForm() {
     }
   }
 
+ 
 
-/*   const toggleTextarea = (field) => {
-    setTextareas((prevState) => ({
-      ...prevState,
-      [field]: !prevState[field],
-    }));
-  }; */
-
+  
+  
   useEffect(() => {
     const fetchData = async () => {
       await loadConductores();
@@ -66,11 +62,11 @@ export default function ChecklistForm() {
     };
     fetchData();
   }, []);
-
+  
   const handleSelectChange = (e) => {
     const { name, value } = e.target;
     setSelectedValues((prev) => ({ ...prev, [name]: value }));
-
+    
     if (value === "Observacion") {
       setTextareas((prev) => ({ ...prev, [name]: true }));
     } else {
@@ -78,7 +74,7 @@ export default function ChecklistForm() {
       setTextareaValues((prev) => ({ ...prev, [name]: "" })); // Resetear observación
     }
   };
-
+  
   const handleTextareaChange = (e) => {
     const { name, value } = e.target;
     setTextareaValues((prev) => ({ ...prev, [name]: value })); // Actualiza solo el texto del textarea
@@ -87,15 +83,112 @@ export default function ChecklistForm() {
   const selectedConductor = conductores.find(
     (conductor) => conductor.id === Number(selectedConductorId)
   );
-
+  
   const vehiculoSelected = vehiculos.find(
     (vehiculo) => vehiculo.id === Number(selectedVehiculo)
   );
+  
+  const MAX_FILE_SIZE_MB = 10;  // Límite de tamaño de Cloudinary
+const MAX_MEGAPIXELS = 25;    // Límite de megapíxeles de Cloudinary
+const MAX_WIDTH = 2500;       // Reducción máxima de ancho
+const MAX_HEIGHT = 2500;      // Reducción máxima de alto
+const IMAGE_QUALITY = 0.7;    // Calidad de compresión JPEG (0 - 1)
 
-  const handleFileChange = (event) => {
-    const files = Array.from(event.target.files);
-    setFile((prevFiles) => [...prevFiles, ...files]); // Agregar imágenes sin reemplazar las anteriores
+const handleFileChange = async (event) => {
+  const files = Array.from(event.target.files);
+  setFile((prevFiles) => [...prevFiles, ...files]); // Agregar imágenes sin reemplazar las anteriores
+
+  const preset_name = "checklist";                         
+  const cloud_name = "dyyz93t5j";
+
+  const resizeImage = (file) => {
+    return new Promise((resolve, reject) => {
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        console.warn(`⚠️ La imagen ${file.name} excede el tamaño permitido y será comprimida.`);
+      }
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          const megapixels = (width * height) / 1_000_000;
+
+          if (megapixels > MAX_MEGAPIXELS) {
+            console.warn(`⚠️ La imagen ${file.name} tiene ${megapixels.toFixed(1)} MP y será redimensionada.`);
+          }
+
+          // Redimensionar manteniendo proporción si excede el tamaño
+          if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+            if (width > height) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            } else {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convertir a JPEG con calidad reducida
+          canvas.toBlob(
+            (blob) => resolve(blob),
+            "image/jpeg",
+            IMAGE_QUALITY
+          );
+        };
+
+        img.onerror = (error) => reject(error);
+      };
+
+      reader.onerror = (error) => reject(error);
+    });
   };
+
+  try {
+    let imageUrls = [];
+
+    // Procesar y subir cada imagen
+    const uploadPromises = files.map(async (file) => {
+      const compressedFile = await resizeImage(file);
+
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+      formData.append("upload_preset", preset_name);
+
+      const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error?.message || "Error en la subida de imagen");
+      }
+
+      const uploadData = await uploadResponse.json();
+      return uploadData.secure_url;
+    });
+
+    imageUrls = await Promise.all(uploadPromises);
+    console.log("✅ Imágenes subidas con éxito:", imageUrls);
+  } catch (error) {
+    console.error("🚨 Error en la subida:", error);
+  }
+};
+
+  
 
   const removeImage = (index) => {
     setFile((prevFiles) => prevFiles.filter((_, i) => i !== index)); // Eliminar imagen por índice
@@ -115,11 +208,9 @@ export default function ChecklistForm() {
       }
     });
 
-    const formData = new FormData();
-    file.forEach((image) => formData.append("images", image)); // Adjuntar todas las imágenes
 
 
-    try {
+    /* try {
       let imageUrls = [];
       if (file.length > 0) {
         // Subir la imagen al backend
@@ -139,7 +230,7 @@ export default function ChecklistForm() {
         if (!imageUrls || imageUrls.length === 0) {
           throw new Error("No se obtuvo URL de la imagen");
         }
-      }
+      } */
 
       // Recopilar los datos del formulario
       const data = {
@@ -223,9 +314,7 @@ export default function ChecklistForm() {
       const resEmailData = await emailResponse.json();
       console.log("✅ Correo enviado correctamente:", resEmailData);
       console.log("Respuesta del servidor:", resData);
-    } catch (error) {
-      console.error("Error en la subida:", error);
-    }
+    
 
   };
 
