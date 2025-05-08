@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Proyecto: Checklist Transporte
 
-## Getting Started
+## Descripción
 
-First, run the development server:
+Este proyecto es una aplicación web diseñada para gestionar y registrar checklists de transporte. Su objetivo principal es facilitar la inspección y el control de vehículos y conductores, asegurando que cumplan con los estándares de seguridad y mantenimiento requeridos.
 
-```bash
+La aplicación incluye funcionalidades como:
+- Registro de conductores y vehículos.
+- Creación de checklists detallados con observaciones específicas.
+- Subida de imágenes relacionadas con los checklists.
+- Envío de notificaciones por correo electrónico con los detalles del checklist.
+- Gestión de datos mediante una base de datos SQLite utilizando Prisma como ORM.
+
+## Tecnologías Utilizadas
+
+- **Frontend**: Next.js, React, TailwindCSS.
+- **Backend**: API Routes de Next.js.
+- **Base de Datos**: SQLite con Prisma.
+- **Almacenamiento de Imágenes**: Cloudinary.
+- **Correo Electrónico**: Resend para el envío de emails.
+- **Despliegue**: Compatible con Vercel.
+
+## Funcionalidades Principales
+
+1. **Gestión de Conductores y Vehículos**:
+   - Listado de conductores y vehículos desde la base de datos.
+   - Selección de conductores y vehículos para asociarlos a un checklist.
+
+2. **Creación de Checklists**:
+   - Formulario dinámico para registrar el estado de diferentes aspectos del vehículo, como:
+     - Documentación del conductor y vehículo.
+     - Estado de cristales, luces, ruedas, frenos, entre otros.
+     - Observaciones adicionales.
+   - Subida de imágenes relacionadas con el checklist.
+
+3. **Validación y Almacenamiento**:
+   - Validación de datos en el frontend y backend.
+   - Almacenamiento de los checklists en la base de datos mediante Prisma.
+
+4. **Notificaciones por Correo Electrónico**:
+   - Envío automático de un correo electrónico con los detalles del checklist al completar el formulario.
+
+5. **Subida de Imágenes**:
+   - Compresión y redimensionamiento de imágenes antes de subirlas a Cloudinary.
+   - Almacenamiento de las URLs de las imágenes en la base de datos.
+
+## Estructura del Proyecto
+├── prisma/
+│   ├── schema.prisma       # Esquema de la base de datos
+│   ├── dev.db              # Base de datos SQLite
+├── public/                 # Archivos estáticos
+├── src/
+│   ├── app/
+│   │   ├── api/            # Rutas API para manejar datos
+│   │   ├── page.jsx        # Página principal con el formulario de checklist
+│   │   ├── layout.jsx      # Layout principal de la aplicación
+│   ├── components/         # Componentes reutilizables (e.g., plantillas de email)
+├── .env                    # Variables de entorno
+├── package.json            # Dependencias y scripts del proyecto
+├── README.md               # Documentación del proyecto
+
+
+## Instalación y Configuración
+
+1. Clona el repositorio:
+   ```bash
+   git clone <URL_DEL_REPOSITORIO>
+   cd checklist
+
+2. Instala las dependencias:
+npm install
+
+3. Configura las variables de entorno en el archivo .env:
+DATABASE_URL="file:./prisma/dev.db"
+CLOUDINARY_CLOUD_NAME="tu_cloud_name"
+CLOUDINARY_API_KEY="tu_api_key"
+CLOUDINARY_API_SECRET="tu_api_secret"
+RESEND_API_KEY="tu_resend_api_key"
+
+4. Ejecuta las migraciones de la base de datos:
+npx prisma migrate dev --name init
+
+5. Inicia el servidor de desarrollo:
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+6. Abre la aplicación en tu navegador en http://localhost:3000.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Despliegue
+El proyecto está optimizado para ser desplegado en Vercel. Sigue estos pasos para desplegar:
+1. Conecta el repositorio a Vercel.
+2. Configura las variables de entorno en el panel de Vercel.
+3. Realiza el despliegue directamente desde la plataforma.
